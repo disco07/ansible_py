@@ -40,6 +40,14 @@ def execute_tasks(todos_file, inventory_file):
                 elif module_name == "service":
                     module = ServiceModule(params)
                 elif module_name == "template":
+                    params = {
+                        "src": "default.conf.j2",
+                        "dest": "/etc/nginx/sites-enabled/default",
+                        "vars": {
+                            "listen_port": 8000,
+                            "server_name": "_"
+                        }
+                    }
                     module = TemplateModule(params)
                 module.process(ssh_client)
 
