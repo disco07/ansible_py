@@ -14,7 +14,7 @@ class CmdResult:
 
 
 def run_remote_cmd(command: str, ssh_client: SSHClient) -> CmdResult:
-    stdin, stdout, stderr = ssh_client.exec_command(command)
+    stdin, stdout, stderr = ssh_client.exec_command(command, get_pty=True)
     exit_code = stdout.channel.recv_exit_status()
     return CmdResult(stdout.read().decode(), stderr.read().decode(), exit_code)
 
@@ -26,8 +26,10 @@ def connect_ssh(hostname, port, username, password, private_key):
     try:
         if private_key:
             private_key_obj = RSAKey.from_private_key_file(private_key)
+            logging.info(f"Connexion établie")
             ssh_client.connect(hostname=hostname, port=port, username=username, pkey=private_key_obj)
         else:
+            logging.info(f"Connexion établie")
             ssh_client.connect(hostname=hostname, port=port, username=username, password=password)
 
         return ssh_client

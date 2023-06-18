@@ -7,30 +7,30 @@ class AptModule(BaseModule):
     name: str = "apt"
 
     def process(self, ssh_client):
-        action = self.params.get("action")
+        state = self.params.get("state")
         package_name = self.params.get("name")
 
-        if action == "install":
+        if state == "present":
             self.install_package(ssh_client, package_name)
-        elif action == "remove":
+        elif state == "absent":
             self.remove_package(ssh_client, package_name)
         else:
-            logging.error(f"Unsupported action for apt module: {action}")
+            logging.critical(f"Unsupported action for apt module: {state}")
 
     def install_package(self, ssh_client, package_name):
-        command = f"apt-get install -y {package_name}"
+        command = f"sudo apt-get install -y {package_name}"
         result = run_remote_cmd(command, ssh_client)
-        self.handle_command_result(result, package_name, "installed")
+        self.handle_command_result(result, package_name, ssh_client)
 
     def remove_package(self, ssh_client, package_name):
-        command = f"apt-get remove -y {package_name}"
+        command = f"sudo apt-get remove -y {package_name}"
         result = run_remote_cmd(command, ssh_client)
-        self.handle_command_result(result, package_name, "removed")
+        logging.info(f"processing {result.stdout} tasks on hosts: {ssh_client.host}")
+        self.handle_command_result(result, package_name, ssh_client)
 
     @staticmethod
-    def handle_command_result(result, package_name, action):
-        if result["exit_code"] == 0:
-            logging.info(f"Package '{package_name}' successfully {action}.")
+    def handle_command_result(result, package_name, ssh_client):
+        if result.exit_code == 0:
+            logging.info(f"host={ssh_client.host} op=apt name={package_name} status=CHANGED")
         else:
-            logging.error(f"Failed to {action} package '{package_name}'.")
-            logging.error(f"Error: {result['stderr']}")
+            logging.error(f"Error: {result.stderr}")

@@ -11,7 +11,7 @@ from modules.template import TemplateModule
 
 
 def execute_tasks(todos_file, inventory_file):
-    global ssh_client
+    global ssh_client, module
     with open(todos_file) as file:
         tasks = yaml.safe_load(file)
 
@@ -51,19 +51,28 @@ def execute_tasks(todos_file, inventory_file):
                     module = TemplateModule(params)
                 module.process(ssh_client)
 
-            # Par exemple, vous pouvez imprimer les informations de l'hôte
-            logging.info(f"Host: {host}")
-            logging.info(f"SSH Address: {ssh_address}")
-            logging.info(f"SSH Port: {ssh_port}")
-            logging.info(f"SSH Username: {ssh_username}")
-            logging.info(f"SSH Password: {ssh_password}")
-            logging.info(f"SSH Private Key: {ssh_private_key}")
-
             # N'oubliez pas de fermer la connexion SSH
             ssh_client.close()
 
 
 if __name__ == "__main__":
+    # create logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    # create console handler and set level to debug
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+
+    # create formatter
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    # add formatter to ch
+    ch.setFormatter(formatter)
+
+    # add ch to logger
+    logger.addHandler(ch)
+
     parser = argparse.ArgumentParser(description='Program description')
     parser.add_argument('-f', '--todos', type=str, help='Path to todos.yml file')
     parser.add_argument('-i', '--inventory', type=str, help='Path to inventory.yml file')
