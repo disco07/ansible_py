@@ -22,8 +22,8 @@ class TemplateModule(BaseModule):
         rendered_content = template.render(vars)
 
         # Écriture du fichier templatisé sur l'hôte distant
-        command = f"echo '{rendered_content}' | sudo tee {dest}"
-        result = run_remote_cmd(command, ssh_client)
+        command = f"echo '{rendered_content}' | sudo -S tee {dest}"
+        result = run_remote_cmd(command, ssh_client, self.params.get("config"))
 
         # Vérification du résultat de l'exécution de la commande
         if result.exit_code == 0:

@@ -1,6 +1,8 @@
 import logging
 import os
 
+from paramiko.client import SSHClient
+
 from mla import run_remote_cmd
 from .base import BaseModule
 
@@ -22,7 +24,7 @@ class CopyModule(BaseModule):
 
     def copy_files(self, ssh_client, source, destination, backup):
         command = f"mkdir -p {destination}"
-        result = run_remote_cmd(command, ssh_client)
+        result = run_remote_cmd(command, ssh_client, self.params.get("config"))
         if result.exit_code != 0:
             logger.error(f"Failed to create destination directory '{destination}'.")
             logger.error(f"Error: {result.stderr}")
@@ -36,7 +38,7 @@ class CopyModule(BaseModule):
     def copy_file(self, ssh_client, source, destination, backup):
         remote_path = os.path.join(destination, os.path.basename(source))
         if backup:
-            self.backup_existing_file(ssh_client, remote_path)
+            self.backup_existing_file(ssh_client, remote_path, self.params.get("config"))
         self.upload_file(ssh_client, source, remote_path)
 
     def copy_directory(self, ssh_client, source, destination, backup):
@@ -44,7 +46,7 @@ class CopyModule(BaseModule):
             relative_path = os.path.relpath(root, source)
             remote_path = os.path.join(destination, relative_path)
             remote_path = remote_path.replace("\.", "")
-            self.create_remote_directory(ssh_client, remote_path)
+            self.create_remote_directory(ssh_client, remote_path, self.params.get("config"))
 
             for file in files:
                 local_file = os.path.join(root, file)
@@ -52,21 +54,21 @@ class CopyModule(BaseModule):
                 remote_file = os.path.join(remote_path, file)
                 remote_file = remote_file.replace("\\", "/")
                 if backup:
-                    self.backup_existing_file(ssh_client, remote_file)
+                    self.backup_existing_file(ssh_client, remote_file, self.params.get("config"))
                 self.upload_file(ssh_client, local_file, remote_file)
 
     @staticmethod
-    def create_remote_directory(ssh_client, remote_path):
+    def create_remote_directory(ssh_client: SSHClient, remote_path, config: dict):
         command = f"mkdir -p {remote_path}"
-        result = run_remote_cmd(command, ssh_client)
+        result = run_remote_cmd(command, ssh_client, config)
         if result.exit_code != 0:
             logger.error(f"Failed to create remote directory '{remote_path}'.")
             logger.error(f"Error: {result.stderr}")
 
     @staticmethod
-    def backup_existing_file(ssh_client, remote_path):
+    def backup_existing_file(ssh_client, remote_path, config: dict):
         command = f"mv {remote_path} {remote_path}.bak"
-        run_remote_cmd(command, ssh_client)
+        run_remote_cmd(command, ssh_client, config)
 
     @staticmethod
     def upload_file(ssh_client, local_path, remote_path):

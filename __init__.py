@@ -31,7 +31,8 @@ def execute_tasks(todos_file, inventory_file):
         if ssh_client:
             for task in tasks:
                 module_name = task.get("module")
-                params = task.get("params", {})
+                params: dict = task.get("params", {})
+                params.update({"config": {"password": ssh_password}})
 
                 if module_name == "apt":
                     module = AptModule(params)
@@ -40,14 +41,6 @@ def execute_tasks(todos_file, inventory_file):
                 elif module_name == "service":
                     module = ServiceModule(params)
                 elif module_name == "template":
-                    params = {
-                        "src": "default.conf.j2",
-                        "dest": "/etc/nginx/sites-enabled/default",
-                        "vars": {
-                            "listen_port": 8000,
-                            "server_name": "_"
-                        }
-                    }
                     module = TemplateModule(params)
                 module.process(ssh_client)
 

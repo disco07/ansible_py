@@ -20,13 +20,13 @@ class AptModule(BaseModule):
             logging.critical(f"Unsupported action for apt module: {state}")
 
     def install_package(self, ssh_client: SSHClient, package_name):
-        command = f"sudo apt-get install -y {package_name}"
-        result = run_remote_cmd(command, ssh_client)
+        command = f"sudo -S apt-get install -y {package_name}"
+        result = run_remote_cmd(command, ssh_client, self.params.get("config"))
         self.handle_command_result(result, package_name, ssh_client)
 
     def remove_package(self, ssh_client: SSHClient, package_name):
-        command = f"sudo apt-get remove -y {package_name}"
-        result = run_remote_cmd(command, ssh_client)
+        command = f"sudo -S apt-get remove -y {package_name}"
+        result = run_remote_cmd(command, ssh_client, self.params.get("config"))
         self.handle_command_result(result, package_name, ssh_client)
 
     @staticmethod

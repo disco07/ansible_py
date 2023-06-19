@@ -13,8 +13,11 @@ class CmdResult:
         self.exit_code = exit_code
 
 
-def run_remote_cmd(command: str, ssh_client: SSHClient) -> CmdResult:
+def run_remote_cmd(command: str, ssh_client: SSHClient, config: dict) -> CmdResult:
     stdin, stdout, stderr = ssh_client.exec_command(command, get_pty=True)
+    stdin.write(config.get("password", "") + "\n")
+    stdin.flush()
+
     exit_code = stdout.channel.recv_exit_status()
     return CmdResult(stdout.read().decode(), stderr.read().decode(), exit_code)
 
