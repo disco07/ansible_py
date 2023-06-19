@@ -1,12 +1,12 @@
-- module: apt
-  params:
-    name: nginx-common
-    state: absent
-#- module: copy
+#- module: apt
 #  params:
-#    src: ./public
-#    dest: /var/www/public
-#    backup: true
+#    name: nginx-common
+#    state: present
+- module: copy
+  params:
+    src: ./public
+    dest: /var/www/public
+    backup: true
 #- module: template
 #  params:
 #    src: default.conf.j2

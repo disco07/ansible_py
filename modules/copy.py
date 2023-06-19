@@ -43,27 +43,33 @@ class CopyModule(BaseModule):
         for root, dirs, files in os.walk(source):
             relative_path = os.path.relpath(root, source)
             remote_path = os.path.join(destination, relative_path)
+            remote_path = remote_path.replace("\.", "")
             self.create_remote_directory(ssh_client, remote_path)
 
             for file in files:
                 local_file = os.path.join(root, file)
+                local_file = local_file.replace("\\", "/")
                 remote_file = os.path.join(remote_path, file)
+                remote_file = remote_file.replace("\\", "/")
                 if backup:
                     self.backup_existing_file(ssh_client, remote_file)
                 self.upload_file(ssh_client, local_file, remote_file)
 
-    def create_remote_directory(self, ssh_client, remote_path):
+    @staticmethod
+    def create_remote_directory(ssh_client, remote_path):
         command = f"mkdir -p {remote_path}"
         result = run_remote_cmd(command, ssh_client)
         if result.exit_code != 0:
             logger.error(f"Failed to create remote directory '{remote_path}'.")
             logger.error(f"Error: {result.stderr}")
 
-    def backup_existing_file(self, ssh_client, remote_path):
+    @staticmethod
+    def backup_existing_file(ssh_client, remote_path):
         command = f"mv {remote_path} {remote_path}.bak"
         run_remote_cmd(command, ssh_client)
 
-    def upload_file(self, ssh_client, local_path, remote_path):
+    @staticmethod
+    def upload_file(ssh_client, local_path, remote_path):
         sftp = ssh_client.open_sftp()
         sftp.put(local_path, remote_path)
         sftp.close()
