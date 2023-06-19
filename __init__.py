@@ -5,8 +5,10 @@ import yaml
 
 from mla import connect_ssh
 from modules.apt import AptModule
+from modules.command import CommandModule
 from modules.copy import CopyModule
 from modules.service import ServiceModule
+from modules.sysctl import SysctlModule
 from modules.template import TemplateModule
 
 
@@ -42,6 +44,10 @@ def execute_tasks(todos_file, inventory_file):
                     module = ServiceModule(params)
                 elif module_name == "template":
                     module = TemplateModule(params)
+                elif module_name == "command":
+                    module = CommandModule(params)
+                elif module_name == "sysctl":
+                    module = SysctlModule(params)
                 module.process(ssh_client)
 
             # N'oubliez pas de fermer la connexion SSH

@@ -13,7 +13,7 @@ class SysctlModule(BaseModule):
         for key, value in params.items():
             # Modifier la valeur du paramètre sysctl
             command = f"sudo sysctl -w {key}={value}"
-            result = run_remote_cmd(command, ssh_client)
+            result = run_remote_cmd(command, ssh_client, self.params.get("config"))
 
             if result.exit_code == 0:
                 logging.info(f"Sysctl parameter {key} set to {value}")
