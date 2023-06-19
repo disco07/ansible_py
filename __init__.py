@@ -1,5 +1,6 @@
 import argparse
 import logging
+from sys import stdout
 
 import yaml
 
@@ -31,10 +32,12 @@ def execute_tasks(todos_file, inventory_file):
 
         ssh_client = connect_ssh(ssh_address, ssh_port, ssh_username, ssh_password, ssh_private_key)
         if ssh_client:
+            logger.info(f"Number of tasks {len(tasks)}")
             for task in tasks:
                 module_name = task.get("module")
                 params: dict = task.get("params", {})
                 params.update({"config": {"password": ssh_password}})
+                params.update({"ip": ssh_address})
 
                 if module_name == "apt":
                     module = AptModule(params)
@@ -60,7 +63,7 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
 
     # create console handler and set level to debug
-    ch = logging.StreamHandler()
+    ch = logging.StreamHandler(stdout)
     ch.setLevel(logging.DEBUG)
 
     # create formatter
