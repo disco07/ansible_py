@@ -13,7 +13,7 @@ class ServiceModule(BaseModule):
 
         # Vérifier l'état du service
         check_command = f"sudo systemctl is-active {name}"
-        check_result = run_remote_cmd(check_command, ssh_client)
+        check_result = run_remote_cmd(check_command, ssh_client, self.params.get("config"))
 
         if check_result.exit_code == 0 and check_result.stdout.strip() == "active":
             # Le service est déjà actif
@@ -22,7 +22,7 @@ class ServiceModule(BaseModule):
             elif state == "stopped":
                 # Arrêter le service
                 stop_command = f"sudo systemctl stop {name}"
-                stop_result = run_remote_cmd(stop_command, ssh_client)
+                stop_result = run_remote_cmd(stop_command, ssh_client, self.params.get("config"))
 
                 if stop_result.exit_code == 0:
                     logging.info(f"Service {name} stopped successfully")
@@ -32,7 +32,7 @@ class ServiceModule(BaseModule):
             if state == "started":
                 # Démarrer le service
                 start_command = f"sudo systemctl start {name}"
-                start_result = run_remote_cmd(start_command, ssh_client)
+                start_result = run_remote_cmd(start_command, ssh_client, self.params.get("config"))
 
                 if start_result.exit_code == 0:
                     logging.info(f"Service {name} started successfully")
