@@ -2,5 +2,5 @@ hosts:
   server:
     ssh_address: 10.3.24.53
     ssh_port: 22
-    ssh_username: drissa
-    ssh_password: MAmanko91
+    ssh_username: user
+    ssh_password: password
