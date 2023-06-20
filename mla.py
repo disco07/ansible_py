@@ -1,6 +1,5 @@
 import logging
 
-import paramiko
 from paramiko.client import SSHClient, AutoAddPolicy
 from paramiko.rsakey import RSAKey
 from paramiko.ssh_exception import AuthenticationException, PasswordRequiredException, SSHException
